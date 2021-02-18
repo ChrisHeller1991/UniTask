@@ -107,6 +107,8 @@ namespace Cysharp.Threading.Tasks
     {
         public static SynchronizationContext UnitySynchronizationContext => unitySynchronizationContetext;
         public static int MainThreadId => mainThreadId;
+        private static bool isInitialized = false;
+
         internal static string ApplicationDataPath => applicationDataPath;
 
         public static bool IsMainThread => Thread.CurrentThread.ManagedThreadId == mainThreadId;
@@ -116,7 +118,19 @@ namespace Cysharp.Threading.Tasks
         static SynchronizationContext unitySynchronizationContetext;
         static ContinuationQueue[] yielders;
         static PlayerLoopRunner[] runners;
+
         internal static bool IsEditorApplicationQuitting { get; private set; }
+
+        /**************************** CCTOR ***************************/
+        // TEST
+
+        static PlayerLoopHelper()
+        {
+            Init();
+        }
+
+        /**************************************************************/
+
         static PlayerLoopSystem[] InsertRunner(PlayerLoopSystem loopSystem,
             Type loopRunnerYieldType, ContinuationQueue cq, Type lastLoopRunnerYieldType, ContinuationQueue lastCq,
             Type loopRunnerType, PlayerLoopRunner runner, Type lastLoopRunnerType, PlayerLoopRunner lastRunner)
@@ -224,6 +238,11 @@ namespace Cysharp.Threading.Tasks
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Init()
         {
+            UnityEngine.Debug.Log($"{nameof(PlayerLoopHelper)}.{nameof(Init)}() ({nameof(isInitialized)} = {isInitialized})");
+
+            if (isInitialized)
+                return;
+
             // capture default(unity) sync-context.
             unitySynchronizationContetext = SynchronizationContext.Current;
             mainThreadId = Thread.CurrentThread.ManagedThreadId;
@@ -251,6 +270,7 @@ namespace Cysharp.Threading.Tasks
 #endif
 
             Initialize(ref playerLoop);
+            isInitialized = true;
         }
 
 
