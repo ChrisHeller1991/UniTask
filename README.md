@@ -1,5 +1,5 @@
 /******************************************/
-/* Created by https://github.com/Cysharp/ */
+Created by https://github.com/Cysharp/
 /******************************************/
 
 
