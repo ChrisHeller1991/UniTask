@@ -107,7 +107,6 @@ namespace Cysharp.Threading.Tasks
     {
         public static SynchronizationContext UnitySynchronizationContext => unitySynchronizationContetext;
         public static int MainThreadId => mainThreadId;
-        private static bool isInitialized = false;
 
         internal static string ApplicationDataPath => applicationDataPath;
 
@@ -121,9 +120,15 @@ namespace Cysharp.Threading.Tasks
 
         internal static bool IsEditorApplicationQuitting { get; private set; }
 
-        /**************************** CCTOR ***************************/
-        // TEST
+        private static bool isInitialized = false;
 
+        /**************************** CCTOR ***************************/
+
+        /// <summary>
+        /// We call <see cref="Init"/> in the static constructor so that this class is always setup correctly no matter when its static content is accessed.
+        /// <para></para>
+        /// This fixes exceptions when there is code which executes before <see cref="UnityEngine.RuntimeInitializeLoadType.BeforeSceneLoad"/>.
+        /// </summary>
         static PlayerLoopHelper()
         {
             Init();
@@ -235,11 +240,9 @@ namespace Cysharp.Threading.Tasks
             return dest.ToArray();
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)] // This line should be no longer needed
         static void Init()
         {
-            UnityEngine.Debug.Log($"{nameof(PlayerLoopHelper)}.{nameof(Init)}() ({nameof(isInitialized)} = {isInitialized})");
-
             if (isInitialized)
                 return;
 
